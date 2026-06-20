@@ -8,23 +8,12 @@ const fetch = require("node-fetch");
 const app = express();
 app.use(express.json({ limit: "1mb" }));
 
-// ─── CORS: only allow your own frontend domain(s) to call this API ────────
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      if (!origin || allowedOrigins.length === 0 || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-  })
-);
+// ─── CORS: allow any origin to call this API. Claude artifacts can render
+// from origins that aren't predictable in advance, so we keep this open
+// rather than guess. Since the real protection here is that nobody can see
+// the API keys themselves (they never leave this server), an open CORS
+// policy is an acceptable tradeoff for a personal/shared tool like this.
+app.use(cors());
 
 // ════════════════════════════════════════════════════════════════════════
 // MODEL CONFIG — mirrors the frontend's MODELS object. apiModel + provider
