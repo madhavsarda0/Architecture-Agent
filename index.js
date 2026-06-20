@@ -25,8 +25,8 @@ app.use(express.json({ limit: "1mb" }));
 // ════════════════════════════════════════════════════════════════════════
 const MODELS = {
   or_claude_haiku: { provider: "openrouter", apiModel: "anthropic/claude-3.5-haiku" },
-  gemini_flash: { provider: "google", apiModel: "gemini-2.5-flash" },
-  gemini_pro: { provider: "google", apiModel: "gemini-2.5-pro-preview-06-05" },
+  gemini_flash: { provider: "google", apiModel: "gemini-3.5-flash" },
+  gemini_pro: { provider: "google", apiModel: "gemini-3.1-pro-preview" },
   groq_llama: { provider: "groq", apiModel: "llama-3.3-70b-versatile" },
   groq_mixtral: { provider: "groq", apiModel: "mixtral-8x7b-32768" },
   mistral_codestral: { provider: "mistral", apiModel: "codestral-latest" },
