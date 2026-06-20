@@ -6,14 +6,18 @@ const path = require("path");
 const fetch = require("node-fetch");
 
 const app = express();
-app.use(express.json({ limit: "1mb" }));
 
 // ─── CORS: allow any origin to call this API. Claude artifacts can render
 // from origins that aren't predictable in advance, so we keep this open
 // rather than guess. Since the real protection here is that nobody can see
 // the API keys themselves (they never leave this server), an open CORS
 // policy is an acceptable tradeoff for a personal/shared tool like this.
+// IMPORTANT: this must be registered BEFORE express.json() so that preflight
+// OPTIONS requests (sent automatically by browsers before any POST with a
+// JSON body) get CORS headers attached and aren't blocked by the browser.
 app.use(cors());
+app.options("*", cors());
+app.use(express.json({ limit: "1mb" }));
 
 // ════════════════════════════════════════════════════════════════════════
 // MODEL CONFIG — mirrors the frontend's MODELS object. apiModel + provider
