@@ -24,15 +24,15 @@ app.use(express.json({ limit: "1mb" }));
 // only; the real secret keys live in process.env and never leave this file.
 // ════════════════════════════════════════════════════════════════════════
 const MODELS = {
-  or_claude_haiku: { provider: "openrouter", apiModel: "anthropic/claude-3.5-haiku" },
+  or_claude_haiku: { provider: "openrouter", apiModel: "openai/gpt-oss-120b:free" }, // Claude has no free tier on OpenRouter (or anywhere) — swapped to a free general-purpose model. Rename in frontend MODELS if you want the label to match.
   gemini_flash: { provider: "google", apiModel: "gemini-3.5-flash" },
   gemini_pro: { provider: "google", apiModel: "gemini-3.1-pro-preview" },
   groq_llama: { provider: "groq", apiModel: "llama-3.3-70b-versatile" },
-  groq_mixtral: { provider: "groq", apiModel: "mixtral-8x7b-32768" },
+  groq_mixtral: { provider: "groq", apiModel: "llama-3.3-70b-versatile" }, // mixtral-8x7b-32768 was removed by Groq; same model as groq_llama until you pick a different one
   mistral_codestral: { provider: "mistral", apiModel: "codestral-latest" },
-  deepseek_r1: { provider: "openrouter", apiModel: "deepseek/deepseek-r1:free" },
-  qwen3: { provider: "openrouter", apiModel: "qwen/qwen3-235b-a22b:free" },
-  deepseek_v3: { provider: "openrouter", apiModel: "deepseek/deepseek-chat:free" },
+  deepseek_r1: { provider: "openrouter", apiModel: "z-ai/glm-4.5-air:free" }, // deepseek/deepseek-r1:free was discontinued; this free model also supports a reasoning/"thinking" mode
+  qwen3: { provider: "openrouter", apiModel: "qwen/qwen3-235b-a22b:free" }, // NOT in OpenRouter's current top-free list as of June 2026 — verify it still resolves; may need replacing too
+  deepseek_v3: { provider: "openrouter", apiModel: "deepseek/deepseek-chat:free" }, // also NOT in current top-free list — verify; consider moonshotai/kimi-k2.6:free as a fallback
   perplexity_sonar: { provider: "perplexity", apiModel: "sonar" },
 };
 
@@ -51,8 +51,15 @@ async function callChatStyle(endpoint, model, prompt, key, extraHeaders) {
     body: JSON.stringify({ model, messages: [{ role: "user", content: prompt }], max_tokens: 4000, temperature: 0.7 }),
   });
   if (!response.ok) {
-    const err = await response.json().catch(() => ({}));
-    throw new Error(err?.error?.message || `Request failed (${response.status})`);
+    const rawText = await response.text().catch(() => "");
+    let message = `Request failed (${response.status})`;
+    try {
+      const err = JSON.parse(rawText);
+      message = err?.error?.message || err?.message || message;
+    } catch (e) {
+      if (rawText) message = rawText.slice(0, 300);
+    }
+    throw new Error(`[${response.status}] ${message}`);
   }
   const data = await response.json();
   return data.choices?.[0]?.message?.content || "No response received.";
