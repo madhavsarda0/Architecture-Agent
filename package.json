@@ -1,0 +1,17 @@
+{
+  "name": "warpsync-agent-server",
+  "version": "1.0.0",
+  "description": "Backend for Architecture Agent — holds provider API keys server-side, proxies model calls, logs searches for admin review.",
+  "main": "index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "node-fetch": "^2.7.0"
+  }
+}
